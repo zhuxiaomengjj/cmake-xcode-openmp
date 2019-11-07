@@ -25,23 +25,45 @@ endif (CMAKE_BUILD_TYPE MATCHES Release)
 # Add directory with macros
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
-if (CMAKE_GENERATOR STREQUAL Xcode)
-	set (LLVM_ROOT_DIR "/usr/local/opt/llvm")
-	find_package( LLVM )
-	if( LLVM_FOUND )
-		include_directories (${LLVM_LIBRARY_DIRS}/clang/${LLVM_VERSION_BASE_STRING}/include)
-		set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp" )
-		find_library(IOMP5LIB
-			NAMES "iomp5" "iomp5md" "libiomp5" "libiomp5md"
-			HINTS ${LLVM_LIBRARY_DIRS})
-		set (TESTOMP_LIBRARIES ${TESTOMP_LIBRARIES} ${IOMP5LIB})
-	endif( LLVM_FOUND )
-else()
-	find_package( OpenMP )
-	if( OPENMP_FOUND )
-		set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
-	endif( OPENMP_FOUND )
-endif()
+set (LLVM_ROOT_DIR "/usr/local/opt/llvm")
+find_package( LLVM )
+if( LLVM_FOUND )
+	message("LLVM_LIBRARY_DIRS=" ${LLVM_LIBRARY_DIRS})
+	include_directories (${LLVM_LIBRARY_DIRS}/clang/${LLVM_VERSION_BASE_STRING}/include)
+	set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp" )
+	find_library(IOMP5LIB
+		NAMES "iomp5" "iomp5md" "libiomp5" "libiomp5md"
+		HINTS ${LLVM_LIBRARY_DIRS})
+	set (TESTOMP_LIBRARIES ${TESTOMP_LIBRARIES} ${IOMP5LIB})
+
+	set(CMAKE_C_COMPILER "${LLVM_ROOT_DIR}/bin/clang")
+	set(CMAKE_CXX_COMPILER "${LLVM_ROOT_DIR}/bin/clang++")
+	set(OPENMP_LIBRARIES "${LLVM_ROOT_DIR}/lib")
+	# set(OPENMP_INCLUDES "${LLVM_ROOT_DIR}/include")
+
+	OPTION (USE_OpenMP "Use OpenMP to enamble <omp.h>" ON)
+
+	# Find OpenMP
+	if(APPLE AND USE_OpenMP)
+		if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+			set(OpenMP_C "${CMAKE_C_COMPILER}")
+			set(OpenMP_C_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
+			set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
+			set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+			set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+			set(OpenMP_libiomp5_LIBRARY ${OpenMP_C_LIB_NAMES})
+		endif()
+		if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+			set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
+			set(OpenMP_CXX_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
+			set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
+			set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+			set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+			set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+		endif()
+	endif()
+
+endif( LLVM_FOUND )
 
 # finds all files with a given extension
 macro (append_files files ext)
