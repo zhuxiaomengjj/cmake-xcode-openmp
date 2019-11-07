@@ -28,7 +28,7 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 set (LLVM_ROOT_DIR "/usr/local/opt/llvm")
 find_package( LLVM )
 if( LLVM_FOUND )
-	message("LLVM_LIBRARY_DIRS=" ${LLVM_LIBRARY_DIRS})
+	message("LLVM_ROOT_DIR : " ${LLVM_ROOT_DIR})
 	include_directories (${LLVM_LIBRARY_DIRS}/clang/${LLVM_VERSION_BASE_STRING}/include)
 	set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp" )
 	find_library(IOMP5LIB
