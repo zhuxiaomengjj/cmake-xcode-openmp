@@ -30,6 +30,7 @@ find_package( LLVM )
 if( LLVM_FOUND )
 	message("LLVM_ROOT_DIR : " ${LLVM_ROOT_DIR})
 	include_directories (${LLVM_LIBRARY_DIRS}/clang/${LLVM_VERSION_BASE_STRING}/include)
+	link_directories("${LLVM_ROOT_DIR}/lib");
 	set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp" )
 	find_library(IOMP5LIB
 		NAMES "iomp5" "iomp5md" "libiomp5" "libiomp5md"
